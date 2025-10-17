@@ -1,0 +1,1902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calvary Sound System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0a0e27;
+            color: #e0e6ed;
+            overflow-x: hidden;
+        }
+        
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 111, 145, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(72, 149, 239, 0.15) 0%, transparent 50%);
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .hero {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        
+        .hero h1 {
+            font-size: 4.5em;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            letter-spacing: -2px;
+        }
+        
+        .hero p {
+            font-size: 1.4em;
+            color: #8b92a8;
+            font-weight: 300;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 50px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .search-box {
+            flex: 1;
+            min-width: 300px;
+            position: relative;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 18px 25px 18px 55px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            color: #fff;
+            font-size: 1.05em;
+            transition: all 0.3s;
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+        
+        .search-box::before {
+            content: "🔍";
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2em;
+        }
+        
+        .filter-tabs {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #e0e6ed;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .filter-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: -1;
+        }
+        
+        .filter-btn:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .filter-btn.active {
+            border-color: #667eea;
+            color: #fff;
+        }
+        
+        .filter-btn.active::before {
+            opacity: 1;
+        }
+        
+        .section-title {
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 30px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .section-title::before {
+            content: '';
+            width: 6px;
+            height: 40px;
+            background: linear-gradient(180deg, #667eea, #764ba2);
+            border-radius: 3px;
+        }
+        
+        .masonry {
+            column-count: 4;
+            column-gap: 15px;
+        }
+        
+        @media (max-width: 1400px) {
+            .masonry { 
+                column-count: 3;
+            }
+        }
+        
+        @media (max-width: 900px) {
+            .masonry { 
+                column-count: 2;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .masonry { 
+                column-count: 1;
+            }
+        }
+        
+        .channel-card {
+            margin-bottom: 0;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 16px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            will-change: transform;
+        }
+        
+        .channel-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--accent-color);
+        }
+        
+        .channel-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: var(--accent-color);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .channel-card.expanded {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--accent-color);
+        }
+        
+        .channel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .channel-name {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: #fff;
+        }
+        
+        .channel-type {
+            padding: 4px 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            font-size: 0.7em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .channel-quick-info {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 0.9em;
+        }
+        
+        .quick-info-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .quick-label {
+            color: #8b92a8;
+            font-weight: 600;
+            min-width: 50px;
+            font-size: 0.85em;
+        }
+        
+        .quick-value {
+            color: #e0e6ed;
+            font-weight: 500;
+            font-size: 0.9em;
+        }
+        
+        .channel-details {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .channel-card.expanded .channel-details {
+            display: flex;
+        }
+        
+        .detail-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 0.85em;
+        }
+        
+        .detail-label {
+            color: #8b92a8;
+            min-width: 80px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+        
+        .detail-value {
+            color: #e0e6ed;
+            font-weight: 500;
+            flex: 1;
+        }
+        
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 8px;
+            background: rgba(102, 126, 234, 0.15);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 6px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin: 2px;
+            color: #a5b4fc;
+        }
+        
+        .tag.send { background: rgba(255, 111, 145, 0.15); border-color: rgba(255, 111, 145, 0.3); color: #fca5a5; }
+        .tag.fx { background: rgba(72, 149, 239, 0.15); border-color: rgba(72, 149, 239, 0.3); color: #93c5fd; }
+        .tag.dca { background: rgba(168, 85, 247, 0.15); border-color: rgba(168, 85, 247, 0.3); color: #d8b4fe; }
+        
+        .flow-container {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 35px;
+            margin-bottom: 25px;
+        }
+        
+        .flow-title {
+            font-size: 1.8em;
+            font-weight: 700;
+            margin-bottom: 25px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .flow-diagram {
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            line-height: 1.8;
+            color: #b8c5d6;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 25px;
+            border-radius: 12px;
+            overflow-x: auto;
+            white-space: pre;
+        }
+        
+        .flow-diagram strong {
+            color: #667eea;
+            font-weight: 700;
+        }
+        
+        .hidden { display: none !important; }
+        
+        .highlight {
+            background: rgba(255, 235, 59, 0.3);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        
+        /* Color coding */
+        .cyan { --accent-color: #00bcd4; }
+        .blue { --accent-color: #2196f3; }
+        .red { --accent-color: #f44336; }
+        .yellow { --accent-color: #ffeb3b; }
+        .green { --accent-color: #4caf50; }
+        .magenta { --accent-color: #e91e63; }
+        .white { --accent-color: #ffffff; }
+        
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 50px;
+        }
+        
+        .stat-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .stat-box:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+        
+        .stat-number {
+            font-size: 3em;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #8b92a8;
+            font-size: 0.95em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .quick-links {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+        
+        .quick-link {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 50px;
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .quick-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            border-color: #667eea;
+        }
+        
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            background: rgba(10, 14, 39, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 100;
+            padding: 20px 0;
+            margin: -40px -20px 40px -20px;
+            padding-left: 20px;
+            padding-right: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .info-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            background: rgba(102, 126, 234, 0.15);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 6px;
+            font-size: 0.75em;
+            font-weight: 600;
+            color: #a5b4fc;
+            margin: 2px;
+        }
+        
+        .info-badge.warning {
+            background: rgba(255, 193, 7, 0.15);
+            border-color: rgba(255, 193, 7, 0.3);
+            color: #ffd54f;
+        }
+        
+        .info-badge.success {
+            background: rgba(76, 175, 80, 0.15);
+            border-color: rgba(76, 175, 80, 0.3);
+            color: #81c784;
+        }
+        
+        .channel-card.compact {
+            padding: 20px;
+        }
+        
+        .channel-card.compact .channel-name {
+            font-size: 1.2em;
+        }
+        
+        .expand-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-top: 12px;
+        }
+        
+        .expand-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-pattern"></div>
+    
+    <div class="container">
+        <div class="hero">
+            <h1>Calvary Sound System</h1>
+            <p>X32 + S32 Complete Routing Database</p>
+        </div>
+        
+        <div class="sticky-header">
+            <div class="controls">
+                <div class="search-box">
+                    <input type="text" id="search" placeholder="Search channels, buses, effects...">
+                </div>
+                <div class="filter-tabs">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="vocals">Vocals</button>
+                    <button class="filter-btn" data-filter="instruments">Instruments</button>
+                    <button class="filter-btn" data-filter="drums">Drums</button>
+                    <button class="filter-btn" data-filter="buses">Buses</button>
+                    <button class="filter-btn" data-filter="fx">FX</button>
+                    <button class="filter-btn" data-filter="outputs">Outputs</button>
+                    <button class="filter-btn" data-filter="flow">Signal Flow</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="stat-grid">
+            <div class="stat-box">
+                <div class="stat-number">32</div>
+                <div class="stat-label">Input Channels</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">16</div>
+                <div class="stat-label">Mix Buses</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">6</div>
+                <div class="stat-label">Matrix Outputs</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">8</div>
+                <div class="stat-label">FX Processors</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">8</div>
+                <div class="stat-label">DCA Groups</div>
+            </div>
+        </div>
+        
+        <div class="quick-links">
+            <a class="quick-link" onclick="scrollToSection('vocals')">Jump to Vocals →</a>
+            <a class="quick-link" onclick="scrollToSection('livestream')">Livestream Setup →</a>
+            <a class="quick-link" onclick="scrollToSection('monitors')">Monitor Mix →</a>
+            <a class="quick-link" onclick="scrollToSection('buses')">Bus Routing →</a>
+        </div>
+        
+        <div id="content">
+            <!-- VOCALS SECTION -->
+            <div class="section-title" id="vocals">Vocal Channels</div>
+            <div class="masonry">
+                <div class="channel-card cyan" data-category="vocals">
+                    <div class="channel-header">
+                        <div class="channel-name">CH 01 - Jason</div>
+                        <div class="channel-type">Speaker</div>
+                    </div>
+                    <div class="channel-quick-info">
+                        <div class="quick-info-row">
+                            <div class="quick-label">Input:</div>
+                            <div class="quick-value">Local 1</div>
+                        </div>
+                        <div class="quick-info-row">
+                            <div class="quick-label">Output:</div>
+                            <div class="quick-value">Main L/R, Bus 10</div>
+                        </div>
+                    </div>
+                    <div class="channel-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Main Fader</div>
+                            <div class="detail-value">-23.5 dB</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Bus Sends</div>
+                            <div class="detail-value">
+                                <span class="tag send">Bus 10: +2.8</span>
+                                <span class="tag send">Bus 13: -∞</span>
+                                <span class="tag send">Bus 15: -∞</span>
+                            </div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Insert</div>
+                            <div class="detail-value">None</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="channel-card cyan" data-category="vocals">
+                    <div class="channel-header">
+                        <div class="channel-name">CH 02 - Black HH</div>
+                        <div class="channel-type">Speaker</div>
+                    </div>
+                    <div class="channel-quick-info">
+                        <div class="quick-info-row">
+                            <div class="quick-label">Input:</div>
+                            <div class="quick-value">Local 2</div>
+                        </div>
+                        <div class="quick-info-row">
+                            <div class="quick-label">Output:</div>
+                            <div class="quick-value">Main L/R, Bus 10</div>
+                        </div>
+                    </div>
+                    <div class="channel-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Main Fader</div>
+                            <div class="detail-value">-7.5 dB</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Insert</div>
+                            <div class="detail-value"><span class="info-badge warning">FX8L (De-esser) PRE</span></div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Bus Sends</div>
+                            <div class="detail-value">
+                                <span class="tag send">Bus 10: +3.8</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="channel-card cyan" data-category="vocals">
+                    <div class="channel-header">
+                        <div class="channel-name">CH 03 - Red Mic</div>
+                        <div class="channel-type">Speaker</div>
+                    </div>
+                    <div class="channel-quick-info">
+                        <div class="quick-info-row">
+                            <div class="quick-label">Input:</div>
+                            <div class="quick-value">Local 3</div>
+                        </div>
+                        <div class="quick-info-row">
+                            <div class="quick-label">Output:</div>
+                            <div class="quick-value">Main L/R, Bus 10</div>
+                        </div>
+                    </div>
+                    <div class="channel-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Main Fader</div>
+                            <div class="detail-value">-7.5 dB</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Bus Sends</div>
+                            <div class="detail-value">
+                                <span class="tag send">Bus 10: +0.8</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="channel-card cyan" data-category="vocals">
+                    <div class="channel-header">
+                        <div class="channel-name">CH 04 - Vox 1</div>
+                        <div class="channel-type">Wired</div>
+                    </div>
+                    <div class="channel-quick-info">
+                        <div class="quick-info-row">
+                            <div class="quick-label">Input:</div>
+                            <div class="quick-value">Local 4</div>
+                        </div>
+                        <div class="quick-info-row">
+                            <div class="quick-label">Output:</div>
+                            <div class="quick-value">Main L/R, Bus 5/9/13</div>
+                        </div>
+                    </div>
+                    <div class="channel-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Main Fader</div>
+                            <div class="detail-value">-21.0 dB</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">FX Send</div>
+                            <div class="detail-value">FX5L (Hall Reverb)</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Gate</div>
+                            <div class="detail-value"><span class="info-badge success">ON @ -59.5 dB</span></div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Bus Sends</div>
+                            <div class="detail-value">
+                                <span class="tag send">Bus 11/12: +3.3 Linked</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="channel-card blue" data-category="instruments">
+                    <div class="channel-header">
+                        <div class="channel-name">CH 13/14 - Pad L/R</div>
+                        <div class="channel-type">Stereo Linked</div>
+                    </div>
+                    <div class="channel-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Source</div>
+                            <div class="detail-value">Local 13-14 (Stereo)</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Main L/R</div>
+                            <div class="detail-value">ON @ -49.0 dB | Fader: -8.8</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Pan</div>
+                            <div class="detail-value">L: -100 / R: +100</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Bus Sends</div>
+                            <div class="detail-value">
+                                <span class="tag send">Bus 11/12: -12.5 Linked</span>
+                            </div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">DCA</div>
+                            <div class="detail-value">
+                                <span class="tag dca">DCA 1 (Pad)</span>
+                                <span class="tag dca">DCA 3 (Inst)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- DRUMS SECTION -->
+            <div class="section-title">Drum Channels</div>
+            <div class="masonry">
+                <div class="channel-card yellow" data-category="drums">
+                    <div class="channel-header">
+                        <div class="channel-name">CH 15/16 - Kick/Snare</div>
+                        <div class="channel-type">Triggers</div>
+                    </div>
+                    <div class="channel-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Source</div>
+                            <div class="detail-value">USB Card 15-16 (Triggers)</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Main L/R</div>
+                            <div class="detail-value">Kick: -3.8 dB | Snare: -25.5 dB</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Bus Sends</div>
+                            <div class="detail-value">
+                                <span class="tag send">Bus 5: PRE (IEM)</span>
+                                <span class="tag send">Bus 11/12: -12.5</span>
+                            </div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">DCA</div>
+                            <div class="detail-value">
+                                <span class="tag dca">DCA 2 (Drum)</span>
+                            </div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Note</div>
+                            <div class="detail-value">Drum triggers from DAW via card</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="channel-card red" data-category="drums">
+                    <div class="channel-header">
+                        <div class="channel-name">CH 19-21 - Toms</div>
+                        <div class="channel-type">Mics</div>
+                    </div>
+                    <div class="channel-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Source</div>
+                            <div class="detail-value">Local 19-21 (Hi/Mid/Low)</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Gate</div>
+                            <div class="detail-value">ON (Expander -22.5 to -49.5 dB)</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Main L/R</div>
+                            <div class="detail-value">ON (various panning)</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Bus Sends</div>
+                            <div class="detail-value">
+                                <span class="tag send">Bus 11/12: -8 to -9</span>
+                            </div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">DCA</div>
+                            <div class="detail-value">
+                                <span class="tag dca">DCA 2 (Drum)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="channel-card red" data-category="drums">
+                    <div class="channel-header">
+                        <div class="channel-name">CH 22-24 - Cymbals/OH</div>
+                        <div class="channel-type">Overhead</div>
+                    </div>
+                    <div class="channel-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Source</div>
+                            <div class="detail-value">Local 22-24 (HiHat, OH L/R)</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Gate</div>
+                            <div class="detail-value">ON @ -51 to -52.5 dB</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Main L/R</div>
+                            <div class="detail-value">Mixed (HiHat OFF, OH varied)</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Bus Sends</div>
+                            <div class="detail-value">
+                                <span class="tag send">Bus 11/12: -8 to -9.8</span>
+                            </div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">DCA</div>
+                            <div class="detail-value">
+                                <span class="tag dca">DCA 2 (Drum)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="channel-card cyan" data-category="drums">
+                    <div class="channel-header">
+                        <div class="channel-name">CH 25 - Room</div>
+                        <div class="channel-type">Ambient</div>
+                    </div>
+                    <div class="channel-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Source</div>
+                            <div class="detail-value">Local 25</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Main L/R</div>
+                            <div class="detail-value">OFF @ -7.5 dB | Fader: -4.0</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Gate</div>
+                            <div class="detail-value">ON @ -59.0 dB</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Purpose</div>
+                            <div class="detail-value">Room mic for drum ambient</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">DCA</div>
+                            <div class="detail-value">
+                                <span class="tag dca">DCA 2 (Drum)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- BUSES SECTION -->
+            <div class="section-title" id="buses">Mix Buses</div>
+            <div class="masonry">
+                <div class="channel-card cyan" data-category="buses">
+                    <div class="channel-header">
+                        <div class="channel-name">Bus 01/02 - Mon 1/2</div>
+                        <div class="channel-type">Wedges</div>
+                    </div>
+                    <div class="channel-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Output</div>
+                            <div class="detail-value">AES50A Out 4-5 → Stage Wedges</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Insert</div>
+                            <div class="detail-value">FX7 L/R (31-band GEQ) PRE</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Fader</div>
+                            <div class="detail-value">-11.4 dB / -10.4 dB</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">EQ</div>
+                            <div class="detail-value">6-band parametric + graphic</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Purpose</div>
+                            <div class="detail-value">Stage monitor wedges w/ feedback control</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="channel-card cyan" data-category="buses">
+                    <div class="channel-header">
+                        <div class="channel-name">Bus 05-08 - IEMs</div>
+                        <div class="channel-type">In-Ears</div>
+                    </div>
+                    <div class="channel-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Outputs</div>
+                            <div class="detail-value">
+                                Bus 5: Drum IEM (AES50A Out 10)<br>
+                                Bus 6: Piano IEM (AES50A Out 11)<br>
+                                Bus 7: GTR IEM (Main Out 22, 31ms delay)<br>
+                                Bus 8: Vox IEM (Main Out 23, 31ms delay)
+                            </div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Fader</div>
+                            <div class="detail-value">+2.0 to +0.7 dB</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">EQ</div>
+                            <div class="detail-value">High-cut filters for ear protection</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Sends</div>
+                            <div class="detail-value">PRE-fader from most channels</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="channel-card white" data-category="buses">
+                    <div class="channel-header">
+                        <div class="channel-name">Bus 09 - Vocals</div>
+                        <div class="channel-type">Submix</div>
+                    </div>
+                    <div class="channel-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Compression</div>
+                            <div class="detail-value">RMS, -28.5 dB threshold, 3:1 ratio</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Fader</div>
+                            <div class="detail-value">-4.4 dB</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Feeds To</div>
+                            <div class="detail-value">Matrix 5/6 (Livestream) @ -5.0 dB</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Purpose</div>
+                            <div class="detail-value">Vocal group for livestream submix</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Includes</div>
+                            <div class="detail-value">All vocals + FX returns</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="channel-card white" data-category="buses">
+                    <div class="channel-header">
+                        <div class="channel-name">Bus 10 - Speakers</div>
+                        <div class="channel-type">Submix</div>
+                    </div>
+                    <div class="channel-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Fader</div>
+                            <div class="detail-value">+1.1 dB</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Feeds To</div>
+                            <div class="detail-value">Matrix 5/6 (Livestream) @ +5.0 dB</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Purpose</div>
+                            <div class="detail-value">Speaker/announcement submix (boosted for clarity)</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Includes</div>
+                            <div class="detail-value">CH 01-03 (Jason, Black HH, Red Mic)</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="channel-card white" data-category="buses">
+                    <div class="channel-header">
+                        <div class="channel-name">Bus 11/12 - Misc L/R</div>
+                        <div class="channel-type">Stereo Submix</div>
+                    </div>
+                    <div class="channel-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Compression</div>
+                            <div class="detail-value">RMS, -24.0 dB threshold, 4:1 ratio</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Fader</div>
+                            <div class="detail-value">+0.7 dB (Stereo Linked)</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Feeds To</div>
+                            <div class="detail-value">Matrix 5/6 (Livestream) @ -7.5 dB</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Purpose</div>
+                            <div class="detail-value">Instruments, drums, playback stereo mix</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Includes</div>
+                            <div class="detail-value">Guitars, keys, drums, pads, graphics, aux</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="channel-card magenta" data-category="buses">
+                    <div class="channel-header">
+                        <div class="channel-name">Bus 13-16 - FX Sends</div>
+                        <div class="channel-type">Effects</div>
+                    </div>
+                    <div class="channel-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Bus 13</div>
+                            <div class="detail-value">FX1 (Ambiance) @ +0.3 dB</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Bus 14</div>
+                            <div class="detail-value">FX2 (Plate) @ +0.6 dB</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Bus 15</div>
+                            <div class="detail-value">FX3 (Snare/Violin) @ +0.6 dB</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Bus 16</div>
+                            <div class="detail-value">FX4 (Delay, Compressed) @ -0.4 dB</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">EQ</div>
+                            <div class="detail-value">High-pass + Low-pass filtering on all</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- FX SECTION -->
+            <div class="section-title">FX Processors</div>
+            <div class="masonry">
+                <div class="channel-card magenta" data-category="fx">
+                    <div class="channel-header">
+                        <div class="channel-name">FX 1 - Ambiance</div>
+                        <div class="channel-type">Hall Reverb</div>
+                    </div>
+                    <div class="channel-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Type</div>
+                            <div class="detail-value">Ambiance Hall Reverb</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Source</div>
+                            <div class="detail-value">Bus 13 (FX 1 Send)</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Return</div>
+                            <div class="detail-value">FX RTN 1/2 → Main L/R</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Parameters</div>
+                            <div class="detail-value">
+                                Pre-delay: 4ms | Decay: 0.78s<br>
+                                Size: 60% | High-cut: 5.06 kHz
+                            </div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Used For</div>
+                            <div class="detail-value">Vocals, speakers</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="channel-card magenta" data-category="fx">
+                    <div class="channel-header">
+                        <div class="channel-name">FX 2 - Rich Plate</div>
+                        <div class="channel-type">Plate Reverb</div>
+                    </div>
+                    <div class="channel-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Type</div>
+                            <div class="detail-value">Rich Plate Reverb</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Source</div>
+                            <div class="detail-value">Bus 14 (FX 2 Send)</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Return</div>
+                            <div class="detail-value">FX RTN 3/4 → Main L/R</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Parameters</div>
+                            <div class="detail-value">
+                                Pre-delay: 10ms | Decay: 3.54s<br>
+                                Size: 27% | High-cut: 4.47 kHz
+                            </div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Used For</div>
+                            <div class="detail-value">Vocals</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="channel-card magenta" data-category="fx">
+                    <div class="channel-header">
+                        <div class="channel-name">FX 4 - Stereo Delay</div>
+                        <div class="channel-type">Delay</div>
+                    </div>
+                    <div class="channel-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Type</div>
+                            <div class="detail-value">Stereo Delay</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Source</div>
+                            <div class="detail-value">Bus 16 (FX 4 Send)</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Return</div>
+                            <div class="detail-value">FX RTN 7/8 → Main L/R</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Parameters</div>
+                            <div class="detail-value">
+                                Time: 444ms | Feedback: 13%<br>
+                                Mix: 100% | High-cut: 20 kHz
+                            </div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Used For</div>
+                            <div class="detail-value">Vocals, guitars</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="channel-card magenta" data-category="fx">
+                    <div class="channel-header">
+                        <div class="channel-name">FX 5/6 - Leslie/Hall</div>
+                        <div class="channel-type">Insert</div>
+                    </div>
+                    <div class="channel-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Type</div>
+                            <div class="detail-value">Leslie Cabinet Emulator</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Used As</div>
+                            <div class="detail-value">Channel Inserts (PRE/POST)</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Return</div>
+                            <div class="detail-value">FX RTN 5/6 (Hall L/R)</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Parameters</div>
+                            <div class="detail-value">
+                                FX5: Speed 58, Drive 66<br>
+                                FX6: Speed 46, Drive 58
+                            </div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Inserted On</div>
+                            <div class="detail-value">CH 05-08, 28-32 (Vocals)</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="channel-card magenta" data-category="fx">
+                    <div class="channel-header">
+                        <div class="channel-name">FX 7 - Dual GEQ</div>
+                        <div class="channel-type">Graphic EQ</div>
+                    </div>
+                    <div class="channel-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Type</div>
+                            <div class="detail-value">Dual 31-Band Graphic EQ</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Used As</div>
+                            <div class="detail-value">Bus Inserts (PRE)</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Inserted On</div>
+                            <div class="detail-value">Bus 01/02 (Mon 1/2 Wedges)</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Purpose</div>
+                            <div class="detail-value">Monitor wedge tuning & feedback suppression</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Current</div>
+                            <div class="detail-value">All bands flat (0.0 dB)</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="channel-card magenta" data-category="fx">
+                    <div class="channel-header">
+                        <div class="channel-name">FX 8 - De-Esser</div>
+                        <div class="channel-type">Dynamics</div>
+                    </div>
+                    <div class="channel-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Type</div>
+                            <div class="detail-value">Stereo De-Esser</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Used As</div>
+                            <div class="detail-value">Channel Insert (PRE)</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Inserted On</div>
+                            <div class="detail-value">CH 02 (Black HH)</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Parameters</div>
+                            <div class="detail-value">
+                                Threshold: 0.0 dB | Frequency: 33<br>
+                                Gender: MALE → FEM
+                            </div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Purpose</div>
+                            <div class="detail-value">Reduce sibilance/harshness</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- OUTPUTS SECTION -->
+            <div class="section-title" id="livestream">Matrix & Outputs</div>
+            <div class="masonry">
+                <div class="channel-card magenta" data-category="outputs">
+                    <div class="channel-header">
+                        <div class="channel-name">Matrix 05/06 - LIVESTREAM</div>
+                        <div class="channel-type">Primary</div>
+                    </div>
+                    <div class="channel-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Output</div>
+                            <div class="detail-value">Main Out 15-16 → ATEM Mini Pro</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Delay</div>
+                            <div class="detail-value">300ms on Out 15 (video sync)</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Compression</div>
+                            <div class="detail-value">RMS, -20.5 dB threshold, 5:1 ratio</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Fader</div>
+                            <div class="detail-value">-4.5 dB</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">EQ</div>
+                            <div class="detail-value">High boost @ 5.57 kHz (+6.25 dB)</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Routing</div>
+                            <div class="detail-value">
+                                <span class="tag send">Bus 9 (Vocals): -5.0 dB</span><br>
+                                <span class="tag send">Bus 10 (Speakers): +5.0 dB</span><br>
+                                <span class="tag send">Bus 11/12 (Misc): -7.5 dB</span><br>
+                                <span class="tag send">Main L/R: -28.5 dB (safety)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="channel-card white" data-category="outputs">
+                    <div class="channel-header">
+                        <div class="channel-name">Main L/R - House PA</div>
+                        <div class="channel-type">Primary</div>
+                    </div>
+                    <div class="channel-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Output</div>
+                            <div class="detail-value">AES50A Out 1-2 → S32 → House PA</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Fader</div>
+                            <div class="detail-value">0.0 dB</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">EQ</div>
+                            <div class="detail-value">
+                                21.4 Hz: +14.7 dB (Low shelf)<br>
+                                85.3 Hz: -15.0 dB<br>
+                                1.66 kHz: +7.00 dB<br>
+                                9.03 kHz: -4.00 dB (High shelf)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="channel-card white" data-category="outputs">
+                    <div class="channel-header">
+                        <div class="channel-name">Main M - Subwoofer</div>
+                        <div class="channel-type">Sub</div>
+                    </div>
+                    <div class="channel-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Output</div>
+                            <div class="detail-value">AES50A Out 3 → S32 → Subwoofer</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Fader</div>
+                            <div class="detail-value">0.0 dB</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Low Pass</div>
+                            <div class="detail-value">248.9 Hz, 18dB Butterworth (-14.7 dB)</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Purpose</div>
+                            <div class="detail-value">Mono sub (summed L+R low freq)</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="channel-card magenta" data-category="outputs">
+                    <div class="channel-header">
+                        <div class="channel-name">Matrix 03/04 - Lobby</div>
+                        <div class="channel-type">Zone</div>
+                    </div>
+                    <div class="channel-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Output</div>
+                            <div class="detail-value">Aux Out 3-4 → Lobby Speakers</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Fader</div>
+                            <div class="detail-value">OFF (-5.1 dB)</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">EQ</div>
+                            <div class="detail-value">Low shelf cut @ 98 Hz</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- SIGNAL FLOW SECTION -->
+            <div class="section-title" id="monitors">Signal Flow Diagrams</div>
+            
+            <div class="flow-container" data-category="flow">
+                <div class="flow-title">🎤 Vocal Signal Flow</div>
+                <div class="flow-diagram"><strong>INPUT STAGE:</strong>
+Local In 4-8 (Wired) ──→ CH 04-08 (Vox 1-5)
+Card In 28-32 (Wireless) ──→ CH 28-32 (Vox 1-5 wireless + autotune)
+
+<strong>INSERT FX:</strong>
+CH 05 ──→ FX5L Insert (Leslie/Hall, PRE)
+CH 06 ──→ FX6L Insert (Leslie/Hall, POST)
+CH 07 ──→ FX5R Insert (Leslie/Hall, POST)
+CH 08 ──→ FX6R Insert (Leslie/Hall, POST)
+
+<strong>FX SEND BUSES:</strong>
+All Vocals ──→ Bus 13 ──→ FX1 (Ambiance) ──→ FX RTN 1/2 ──→ Main L/R
+All Vocals ──→ Bus 14 ──→ FX2 (Plate) ──→ FX RTN 3/4 ──→ Main L/R
+Selected ──→ Bus 16 ──→ FX4 (Delay) ──→ FX RTN 7/8 ──→ Main L/R
+
+<strong>VOCAL SUBMIX:</strong>
+All Vox + FX Returns ──→ Bus 9 (Compressed) ──→ Matrix 5/6 @ -5.0 dB
+
+<strong>MONITOR SENDS (PRE-FADER):</strong>
+All Vocals ──→ Bus 1-4 (Wedges), Bus 5-8 (IEMs)
+
+<strong>MAIN OUTPUT:</strong>
+All Vocals ──→ Main L/R ──→ AES50A Out 1-2 ──→ S32 ──→ House PA
+
+<strong>LIVESTREAM:</strong>
+Bus 9 ──→ Matrix 5/6 ──→ Main Out 15-16 (300ms delay) ──→ ATEM
+</div>
+            </div>
+            
+            <div class="flow-container" data-category="flow">
+                <div class="flow-title">🎥 Livestream Mix Structure</div>
+                <div class="flow-diagram"><strong>LIVESTREAM MIX ARCHITECTURE:</strong>
+
+┌────────────────────────────────────────────┐
+│       MATRIX 5/6 (Stream L/R)              │
+│  Compression: RMS, -20.5 dB, 5:1 ratio     │
+│  EQ: High boost at 5.57 kHz (+6.25 dB)    │
+│  Fader: -4.5 dB                            │
+└────────────────────────────────────────────┘
+                    ▲
+                    │
+      ┌─────────────┼─────────────┐
+      │             │             │
+  <strong>BUS 9</strong>         <strong>BUS 10</strong>        <strong>BUS 11/12</strong>
+ (Vocals)     (Speakers)    (Misc/Inst)
+ -5.0 dB       +5.0 dB       -7.5 dB
+      │             │             │
+ All Vox +      CH 01-03      Instruments +
+FX Returns     (Jason,       Drums + Pads +
+              Black HH,      Graphics +
+              Red Mic)       Aux inputs
+      │             │             │
+      └─────────────┴─────────────┘
+                    │
+            Main L/R (-28.5 dB)
+            (Safety/ambient)
+
+<strong>OUTPUT:</strong>
+Matrix 5 → Main Out 15 (300ms video sync) → ATEM L
+Matrix 6 → Main Out 16 → ATEM R
+
+<strong>WHY THIS ROUTING:</strong>
+• Bus 9: Dedicated vocal group with compression
+• Bus 10: Announcements need extra gain for clarity
+• Bus 11/12: All instruments/drums in stereo submix
+• Main L/R safety: Catches anything not in submixes
+</div>
+            </div>
+            
+            <div class="flow-container" data-category="flow">
+                <div class="flow-title">🎸 Instrument & Drum Flow</div>
+                <div class="flow-diagram"><strong>INPUTS:</strong>
+Local In 9-14 ──→ CH 09-14 (GTR 1/2, Keys, Cajon, Pad L/R)
+Local In 15-25 ──→ CH 15-25 (Drums - mics)
+Card In 15-18 ──→ CH 15-18 (Drums - triggers from DAW)
+
+<strong>INSTRUMENT SUBMIX (STEREO):</strong>
+All Instruments ──→ Bus 11/12 (Compressed) ──→ Matrix 5/6 @ -7.5 dB
+All Drums ──→ Bus 11/12
+
+<strong>MONITOR SENDS:</strong>
+Selected channels ──→ Bus 1-8 (Wedges & IEMs, various levels)
+
+<strong>MAIN OUTPUT:</strong>
+All Instruments ──→ Main L/R ──→ AES50A Out 1-2 ──→ House PA
+
+<strong>LIVESTREAM:</strong>
+Bus 11/12 ──→ Matrix 5/6 ──→ Main Out 15-16 ──→ ATEM
+
+<strong>DCA CONTROL:</strong>
+Drums: DCA 2 | Instruments: DCA 3 | Pads: DCA 1
+</div>
+            </div>
+            
+            <div class="flow-container" data-category="flow">
+                <div class="flow-title">🎧 Monitor System Flow</div>
+                <div class="flow-diagram"><strong>WEDGE MONITORS (Bus 1-4):</strong>
+
+Selected Channels (PRE/POST sends)
+              ↓
+       Bus 1-4 Inputs
+              ↓
+   FX7 GEQ Insert (Bus 1-2 only)
+  (31-band feedback suppression)
+              ↓
+ 6-Band Parametric EQ per bus
+              ↓
+    AES50A Out 4-7
+              ↓
+       S32 Out 4-7
+              ↓
+   🔊 Stage Wedges 1-4
+
+<strong>IN-EAR MONITORS (Bus 5-8):</strong>
+
+Selected Channels (PRE sends)
+              ↓
+       Bus 5-8 Inputs
+              ↓
+  High-cut EQ (ear protection)
+              ↓
+    Various Outputs:
+    • Bus 5 → AES50A Out 10 → Drummer IEM
+    • Bus 6 → AES50A Out 11 → Pianist IEM
+    • Bus 7 → Main Out 22 (31ms delay) → GTR IEM
+    • Bus 8 → Main Out 23 (31ms delay) → Vox IEM
+              ↓
+   🎧 Wireless IEM Transmitters
+
+<strong>TALKBACK:</strong>
+CH 26/27 → All Bus 1-8 for engineer communication
+</div>
+            </div>
+            
+            <div class="flow-container" data-category="flow">
+                <div class="flow-title">🏠 House PA & Subwoofer</div>
+                <div class="flow-diagram"><strong>ALL SOURCES → MAIN L/R:</strong>
+
+Channels 1-32 + Aux Inputs + FX Returns
+              ↓
+       Main L/R Bus
+       (0.0 dB fader)
+              ↓
+      6-Band Parametric EQ
+    (House speaker tuning)
+              ↓
+      AES50A Out 1-2
+              ↓
+       S32 Stage Box
+       (Cat5/6 cable)
+              ↓
+    S32 Out 1-2 (XLR)
+              ↓
+      🔊 HOUSE PA L/R
+
+<strong>SUBWOOFER PATH:</strong>
+Main L/R → Summed Mono → Main M Bus
+              ↓
+  LOW PASS: 248.9 Hz (18dB Butterworth)
+              ↓
+      AES50A Out 3
+              ↓
+       S32 Out 3
+              ↓
+      🔉 SUBWOOFER
+</div>
+            </div>
+            
+            <div class="flow-container" data-category="flow">
+                <div class="flow-title">💾 USB Card & Recording</div>
+                <div class="flow-diagram"><strong>RECORDING TO DAW:</strong>
+Main L/R → Card In 1-2 (Record stereo mix)
+Individual Channels → Card In 9-16 (Multitrack stems)
+
+<strong>PLAYBACK FROM DAW:</strong>
+Card Out 1-32 → Console channels
+• Backing tracks, click tracks
+• Virtual soundcheck playback
+• AUX 07/08: USB playback to main mix
+
+<strong>LIVE PROCESSING VIA CARD:</strong>
+Wireless Mics → DAW (Autotune/Processing) → Card → CH 28-32
+Drum Triggers → DAW (Sample triggering) → Card → CH 15-18
+
+<strong>BIDIRECTIONAL WORKFLOW:</strong>
+Console ⇄ USB Card ⇄ DAW (Mac)
+• Real-time effects processing
+• Multi-track recording
+• Playback integration
+</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Filter functionality
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const cards = document.querySelectorAll('.channel-card, .flow-container');
+        const searchInput = document.getElementById('search');
+        
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                const filter = btn.dataset.filter;
+                
+                cards.forEach(card => {
+                    if (filter === 'all') {
+                        card.classList.remove('hidden');
+                    } else {
+                        if (card.dataset.category === filter) {
+                            card.classList.remove('hidden');
+                        } else {
+                            card.classList.add('hidden');
+                        }
+                    }
+                });
+                
+                searchInput.value = '';
+            });
+        });
+        
+        // Search functionality
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            
+            // Reset filter
+            filterBtns.forEach(b => b.classList.remove('active'));
+            filterBtns[0].classList.add('active');
+            
+            cards.forEach(card => {
+                const content = card.textContent.toLowerCase();
+                if (content.includes(searchTerm)) {
+                    card.classList.remove('hidden');
+                    
+                    // Highlight matching text
+                    if (searchTerm && searchTerm.length > 2) {
+                        const detailValues = card.querySelectorAll('.detail-value, .flow-diagram');
+                        detailValues.forEach(val => {
+                            const text = val.textContent;
+                            const regex = new RegExp(`(${searchTerm})`, 'gi');
+                            if (text.toLowerCase().includes(searchTerm)) {
+                                val.innerHTML = text.replace(/<span class="highlight">|<\/span>/g, '').replace(regex, '<span class="highlight">$1</span>');
+                            }
+                        });
+                    }
+                } else {
+                    if (searchTerm) {
+                        card.classList.add('hidden');
+                    } else {
+                        card.classList.remove('hidden');
+                    }
+                }
+            });
+        });
+        
+        // Scroll to section
+        window.scrollToSection = function(id) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        };
+        
+        // Card click to expand
+        document.addEventListener('click', (e) => {
+            const card = e.target.closest('.channel-card, .flow-container');
+            if (card && !card.classList.contains('flow-container')) {
+                card.classList.toggle('expanded');
+            }
+        });
+    </script>
+</body>
+</html> 5: -8.8 PRE</span>
+                                <span class="tag send">Bus 9: +1.5</span>
+                                <span class="tag send">Bus 13: +0.5</span>
+                            </div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">DCA</div>
+                            <div class="detail-value">
+                                <span class="tag dca">DCA 4 (Vox)</span>
+                                <span class="tag dca">DCA 8 (Band)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="channel-card cyan" data-category="vocals">
+                    <div class="channel-header">
+                        <div class="channel-name">CH 05 - Vox 2</div>
+                        <div class="channel-type">Wired</div>
+                    </div>
+                    <div class="channel-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Source</div>
+                            <div class="detail-value">Local Input 5</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Insert</div>
+                            <div class="detail-value">FX5L (Hall, PRE)</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">FX Send</div>
+                            <div class="detail-value">FX1L (Ambiance)</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Main L/R</div>
+                            <div class="detail-value">ON @ -14.5 dB | Fader: -7.4</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Bus Sends</div>
+                            <div class="detail-value">
+                                <span class="tag send">Bus 5: -7.5 PRE</span>
+                                <span class="tag send">Bus 9: +2.0</span>
+                            </div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">DCA</div>
+                            <div class="detail-value">
+                                <span class="tag dca">DCA 4 (Vox)</span>
+                                <span class="tag dca">DCA 8 (Band)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="channel-card cyan" data-category="vocals">
+                    <div class="channel-header">
+                        <div class="channel-name">CH 06 - Vox 3</div>
+                        <div class="channel-type">Wired</div>
+                    </div>
+                    <div class="channel-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Source</div>
+                            <div class="detail-value">Local Input 6</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Insert</div>
+                            <div class="detail-value">FX6L (Hall, POST)</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">FX Send</div>
+                            <div class="detail-value">FX2L (Plate Reverb)</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Main L/R</div>
+                            <div class="detail-value">ON @ -16.0 dB | Fader: +0.5</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Bus Sends</div>
+                            <div class="detail-value">
+                                <span class="tag send">Bus 5: +3.5 PRE</span>
+                                <span class="tag send">Bus 9: +1.5</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="channel-card cyan" data-category="vocals">
+                    <div class="channel-header">
+                        <div class="channel-name">CH 07 - Vox 4</div>
+                        <div class="channel-type">Wired</div>
+                    </div>
+                    <div class="channel-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Source</div>
+                            <div class="detail-value">Local Input 7</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Insert</div>
+                            <div class="detail-value">FX5R (Hall, POST)</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">FX Send</div>
+                            <div class="detail-value">FX4R (Delay)</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Main L/R</div>
+                            <div class="detail-value">ON @ -24.5 dB | Pan: -30</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Bus Sends</div>
+                            <div class="detail-value">
+                                <span class="tag send">Bus 5: +2.8 PRE</span>
+                                <span class="tag send">Bus 9: +1.8</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="channel-card cyan" data-category="vocals">
+                    <div class="channel-header">
+                        <div class="channel-name">CH 08 - Vox 5</div>
+                        <div class="channel-type">Wired</div>
+                    </div>
+                    <div class="channel-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Source</div>
+                            <div class="detail-value">Local Input 8</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Insert</div>
+                            <div class="detail-value">FX6R (Hall, POST)</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">FX Send</div>
+                            <div class="detail-value">FX3R (Snare Plate)</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Main L/R</div>
+                            <div class="detail-value">ON @ -22.0 dB | Fader: -16.4</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Bus Sends</div>
+                            <div class="detail-value">
+                                <span class="tag send">Bus 5: +2.3 PRE</span>
+                                <span class="tag send">Bus 9: +1.3</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="channel-card cyan" data-category="vocals">
+                    <div class="channel-header">
+                        <div class="channel-name">CH 28-32 - Vox Wireless</div>
+                        <div class="channel-type">Card/Wireless</div>
+                    </div>
+                    <div class="channel-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Source</div>
+                            <div class="detail-value">USB Card Inputs (via DAW)</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Purpose</div>
+                            <div class="detail-value">Wireless mics w/ autotune processing</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Routing</div>
+                            <div class="detail-value">Duplicates CH 04-08 configuration</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Note</div>
+                            <div class="detail-value">Real-time VST processing via card I/O</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- INSTRUMENTS SECTION -->
+            <div class="section-title">Instrument Channels</div>
+            <div class="masonry">
+                <div class="channel-card blue" data-category="instruments">
+                    <div class="channel-header">
+                        <div class="channel-name">CH 09/10 - GTR 1/2</div>
+                        <div class="channel-type">Direct</div>
+                    </div>
+                    <div class="channel-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Source</div>
+                            <div class="detail-value">Local 9-10 (DI Boxes)</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Main L/R</div>
+                            <div class="detail-value">ON @ -23.5 dB / -24.0 dB</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Gate</div>
+                            <div class="detail-value">ON @ -61.5 dB</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Bus Sends</div>
+                            <div class="detail-value">
+                                <span class="tag send">Bus 11/12: +2.3 Linked</span>
+                            </div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">DCA</div>
+                            <div class="detail-value">
+                                <span class="tag dca">DCA 3 (Inst)</span>
+                                <span class="tag dca">DCA 8 (Band)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="channel-card blue" data-category="instruments">
+                    <div class="channel-header">
+                        <div class="channel-name">CH 11 - Keys</div>
+                        <div class="channel-type">Stereo</div>
+                    </div>
+                    <div class="channel-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Source</div>
+                            <div class="detail-value">Local Input 11</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Main L/R</div>
+                            <div class="detail-value">OFF @ -15.0 dB</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Gate</div>
+                            <div class="detail-value">ON @ -75.0 dB</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Bus Sends</div>
+                            <div class="detail-value">
+                                <span class="tag send">Bus 11/12: -4.8 Linked</span>
+                            </div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">DCA</div>
+                            <div class="detail-value">
+                                <span class="tag dca">DCA 3 (Inst)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="channel-card blue" data-category="instruments">
+                    <div class="channel-header">
+                        <div class="channel-name">CH 12 - Cajon</div>
+                        <div class="channel-type">Percussion</div>
+                    </div>
+                    <div class="channel-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Source</div>
+                            <div class="detail-value">Local Input 12</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Main L/R</div>
+                            <div class="detail-value">ON @ -4.0 dB</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Gate</div>
+                            <div class="detail-value">ON @ -46.0 dB</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Bus Sends</div>
+                            <div class="detail-value">
+                                <span class="tag send">Bus
